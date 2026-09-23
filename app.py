@@ -1,3 +1,4 @@
+
 """
 NovaMart Analytics — app.py
 ----------------------------
@@ -188,6 +189,21 @@ div[data-testid="stMainMenu"] button svg {
         background-color: var(--nude-accent-dark);
         transform: translateY(-1px);
     }
+    /* Order Date Range text color */
+.stDateInput input{
+    color: white !important;
+    -webkit-text-fill-color: white !important;
+}
+
+/* Date input background */
+.stDateInput > div{
+    background-color: #0F172A !important;
+}
+
+/* Calendar icon */
+.stDateInput svg{
+    fill: white !important;
+}
 
     /* Dataframe container */
     div[data-testid="stDataFrame"]{
