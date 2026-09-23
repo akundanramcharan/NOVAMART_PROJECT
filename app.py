@@ -35,6 +35,44 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+/* ============ HEADER / TOOLBAR (Deploy, ⋮ menu, file-change icon) ============ */
+
+/* Full header/toolbar area — black background */
+header[data-testid="stHeader"],
+div[data-testid="stToolbar"],
+div[data-testid="stAppToolbar"],
+div[data-testid="stMainMenu"],
+div[data-testid="stDecoration"] {
+    background: black !important;
+}
+
+/* Force EVERYTHING inside the header/toolbar to white
+   (covers nested spans, p tags, svg icons, paths, strokes) */
+header[data-testid="stHeader"] *,
+div[data-testid="stToolbar"] *,
+div[data-testid="stAppToolbar"] *,
+div[data-testid="stMainMenu"] * {
+    color: white !important;
+    fill: white !important;
+    stroke: white !important;
+}
+
+/* "Deploy" button text specifically */
+header[data-testid="stHeader"] button span,
+header[data-testid="stHeader"] button p,
+header[data-testid="stHeader"] a span,
+header[data-testid="stHeader"] a p {
+    color: white !important;
+}
+
+/* Three-dot menu + info icon buttons */
+header[data-testid="stHeader"] button svg,
+div[data-testid="stMainMenu"] button svg {
+    fill: white !important;
+    stroke: white !important;
+}
+
+/* ============ REST OF THE THEME ============ */
     :root{
         --nude-bg:#F3E7DA;
         --nude-panel:#FBF4EC;
@@ -125,7 +163,8 @@ st.markdown(
         background-color: var(--nude-panel);
         border: 1px solid var(--nude-border);
         border-radius: 14px;
-        padding: 18px 20px;
+        padding: 4px 8px;
+         min-height: 10px !important;
         transition: box-shadow .2s ease;
     }
     .panel-card:hover{ box-shadow: 0 6px 18px rgba(62, 44, 35, 0.10); }
@@ -139,6 +178,12 @@ st.markdown(
         padding: 8px 18px;
         transition: background-color .18s ease, transform .12s ease;
     }
+    .panel-card h3{
+    margin-top:0px !important;
+    margin-bottom:5px !important;
+    color:#8A5A44 !important;
+    font-size:24px !important;
+}
     .stButton>button:hover, .stDownloadButton>button:hover{
         background-color: var(--nude-accent-dark);
         transform: translateY(-1px);
@@ -150,6 +195,12 @@ st.markdown(
         border-radius: 10px;
         overflow: hidden;
     }
+    .panel-card h3{
+    margin-top:0px !important;
+    margin-bottom:15px !important;
+    color:#8A5A44 !important;
+}
+
 
     /* Smooth scroll + general transitions */
     * { transition: background-color .15s ease, color .15s ease; }
@@ -241,14 +292,43 @@ st.sidebar.caption(f"{len(filtered):,} rows match current filters")
 # ======================================================================
 # KPI CARDS
 # ======================================================================
-k1, k2, k3, k4, k5 = st.columns(5)
-k1.metric("Net Revenue", f"₹{filtered['net_revenue'].sum():,.0f}")
-k2.metric("Profit", f"₹{filtered['profit'].sum():,.0f}")
-k3.metric("Avg Margin", f"{filtered['profit_margin'].mean():.1f}%")
-k4.metric("Orders", f"{filtered['order_id'].nunique():,}")
-k5.metric("Avg Rating", f"{filtered['rating'].mean():.2f} ★")
 
-st.write("")
+def format_number(num):
+    if num >= 1_000_000:
+        return f"₹{num/1_000_000:.1f}M"
+    elif num >= 1_000:
+        return f"₹{num/1_000:.1f}K"
+    else:
+        return f"₹{num:.0f}"
+
+k1, k2, k3, k4, k5 = st.columns(5)
+
+k1.metric(
+    "Net Revenue",
+    format_number(filtered['net_revenue'].sum())
+)
+
+k2.metric(
+    "Profit",
+    format_number(filtered['profit'].sum())
+)
+
+k3.metric(
+    "Avg Margin",
+    f"{filtered['profit_margin'].mean():.1f}%"
+)
+
+k4.metric(
+    "Orders",
+    format_number(filtered['order_id'].nunique())
+)
+
+k5.metric(
+    "Avg Rating",
+    f"{filtered['rating'].mean():.2f} ★"
+)
+
+# st.write("")
 
 # ======================================================================
 # CENTER (chart + table) | RIGHT (chart/analysis options)
@@ -256,8 +336,12 @@ st.write("")
 center, right = st.columns((3, 1))
 
 with right:
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-    st.subheader("⚙️ Analysis Options")
+    st.markdown("""
+    <div class="panel-card">
+        <h3 style="margin-top:0px; margin-bottom:0px; font-size:15px;">
+            ⚙️ Analysis Options
+        </h3>
+    """, unsafe_allow_html=True)
 
     METRIC_OPTIONS = {
         "Net Revenue (Sum)":    ("net_revenue", "sum"),
@@ -276,8 +360,12 @@ with right:
     st.markdown("</div>", unsafe_allow_html=True)
 
 with center:
-    st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-    st.subheader(f"{view_label} — {metric_label}")
+    st.markdown(f"""
+    <div class="panel-card">
+        <h3 style="margin-top:0px; margin-bottom:0px; font-size:15px;">
+            {view_label} — {metric_label}
+        </h3>
+    """, unsafe_allow_html=True)
 
     grouped = (
         filtered.groupby(view_col)[metric_col]
@@ -351,13 +439,17 @@ with center:
     st.dataframe(grouped, use_container_width=True, hide_index=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-st.write("")
+# st.write("")
 
 # ======================================================================
 # BOTTOM — "select columns from here" (detailed raw data table)
 # ======================================================================
-st.markdown('<div class="panel-card">', unsafe_allow_html=True)
-st.subheader("📋 Detailed Data")
+st.markdown("""
+<div class="panel-card">
+    <h3 style="margin-top:0px; margin-bottom:5px; color:#8A5A44;">
+        📋 Detailed Data
+    </h3>
+""", unsafe_allow_html=True)
 
 default_cols = [
     "order_id", "order_date", "category", "subcategory", "product_name",
